@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/privacy', (req, res) => {
-  res.render('privacyPolicy', { title: 'Privacy Policy'});
+  res.render('privacyPolicy', { title: 'Privacy Policy' });
 });
 
 module.exports = router;

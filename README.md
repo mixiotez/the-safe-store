@@ -1,2 +1,3 @@
-# the-safe-store
+# The Safe Store
+
 Facebook Messenger Hackathon's entry
