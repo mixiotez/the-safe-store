@@ -1,6 +1,19 @@
-const axios = require("axios");
+const axios = require("axios"),
+      { USER_CHOICES } = require('./user_choices');
 
 const handleGreeting = async (sender_psid, received_message) => {
+  // Retrieves user's first name
+  const userName = await axios({
+    method: "GET",
+    url: `https://graph.facebook.com/${sender_psid}`,
+    params: {
+      access_token: process.env.PAGE_ACCESS_TOKEN,
+      fields: "first_name",
+    },
+  })
+    .then((user) => user.data.first_name)
+    .catch((err) => console.log("Unable to fetch firstName: ", err));
+
   sendTextMessage(
     sender_psid,
     `Welcome to The Safe Store, ${userName}. We appreciate your preference!`
@@ -46,7 +59,7 @@ const chooseItems = (sender_psid) => {
     sender_psid,
     "No problem! What are you looking to buy?",
     [
-      { title: "Rings", payload: "RINGS" },
+      { title: "Rings", payload: "ITEMS_RINGS" },
       { title: "Bracelets", payload: "ITEMS_BRACELETS" },
       { title: "Necklaces", payload: "ITEMS_NECKLACES" },
       { title: "Earrings", payload: "ITEMS_EARRINGS" },
@@ -90,12 +103,12 @@ const chooseGender = (sender_psid) => {
   )
 };
 
-const chooseBudget = (sender_psid) => {
+const choosePrice = (sender_psid) => {
   sendQuickReplies(
     sender_psid,
     "Sounds good, how much are you willing to spend?",
     [
-      { title: "<$2500", payload: "PRICE_LESS_1000" },
+      { title: "<$2500", payload: "PRICE_LESS_2500" },
       { title: "$2500-$10K", payload: "PRICE_2500_10K" },
       { title: "$10K-$25K", payload: "PRICE_10K_25K" },
       { title: ">$25K", payload: "PRICE_25K_MORE"},
@@ -109,7 +122,7 @@ const chooseMaterials = (sender_psid) => {
     sender_psid,
     "Awesome, how about materials?",
     [
-      { title: "Diamonds", payload: "MATERIAL_DIAMONDS" },
+      { title: "Diamonds", payload: "MATERIAL_DIAMOND" },
       { title: "Onyx", payload: "MATERIAL_ONYX" },
       { title: "Emerald", payload: "MATERIAL_EMERALD" },
       { title: "Other", payload: "MATERIAL_OTHER" },
@@ -131,8 +144,49 @@ const messageUnrecognized = (sender_psid) => {
   );
 };
   
+const displayChoices = (sender_psid) => {
+  sendTextMessage(
+    sender_psid,
+    'Your item: ' + USER_CHOICES['ITEM'] + '\n' + 'Your gender: ' + USER_CHOICES['GENDER'] + '\n' + 
+    'Your metal: ' + USER_CHOICES['METAL'] + '\n' + 'Your material: ' + USER_CHOICES['MATERIAL'] + '\n' + 'Your budget: ' + USER_CHOICES['PRICE'] 
+  );
+};
 
-// Generic functions
+/**
+ * Chooses which branch function to call next.
+ * 
+ * @param {String} category What category to choose from next.
+ */
+const chooser = (category, sender_psid) => {
+  console.log(category);
+  switch (category) {
+    case 'ITEM': 
+      chooseItems(sender_psid); 
+      break;
+    case 'PRICE':
+      choosePrice(sender_psid);
+      break;
+    case 'MATERIAL': 
+      chooseMaterials(sender_psid);
+      break;
+    case 'METAL':
+      chooseMetal(sender_psid);
+      break;
+    case 'GENDER':
+      chooseGender(sender_psid);
+      break;
+    case 'FINISHED':
+      displayChoices(sender_psid);
+      break;
+    default:
+      messageUnrecognized(sender_psid);
+      break;
+  }
+};
+
+
+// ------------------------ Generic functions --------------------- //
+
 const sendQuickReplies = (sender_psid, text, quickReplies) => {
   const quick_replies = quickReplies.map(({ title, payload }) => ({
     content_type: "text",
@@ -163,4 +217,4 @@ const callSendAPI = (sender_psid, response) => {
   }).catch((err) => console.log("Send API error: ", err));
 };
 
-module.exports = { handleGreeting, sendStartMessage, messageUnrecognized, chooseBudget, chooseMaterials, chooseGender, chooseItems, chooseMetal }
+module.exports = { handleGreeting, sendStartMessage, messageUnrecognized, chooser }
