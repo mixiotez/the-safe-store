@@ -1,9 +1,13 @@
 const axios = require("axios"),
       { searchItems } = require("./search.js"),
       { USER_CHOICES } = require('./user_choices');
+const { response } = require("express");
+
+const exec = require('child_process').exec;
 
 var options = []; // Options that are filtered by the choice tree, globals
 var counter = 0;
+var REFERENCE = {};
 
 const handleGreeting = async (sender_psid, received_message) => {
   // Retrieves user's first name
@@ -46,6 +50,12 @@ const handleGreeting = async (sender_psid, received_message) => {
 };
 
 const sendStartMessage = (sender_psid) => {
+  USER_CHOICES = {
+    'ITEM': '',
+    'PRICE': '',
+    'MATERIAL': '',
+    'METAL': ''
+  };
   sendQuickText(
     sender_psid,
     "Alright! Do you want to shop by item category, price, or metal color?",
@@ -157,10 +167,17 @@ Please select from the following options:`,
 };
 
 const iterateChoices = (sender_psid) => {
+  if (counter >= options.length){
+    counter = 0;
+  }
+
+  console.log("Sending media message...");
+  console.log("Counter: " + counter + " ref: " + options[counter].ref);
+
   sendQuickMediaMessage(
     sender_psid,
     [
-      { url: options[counter].image, buttons: [{title: "I like this one!", payload: "LIKE_THIS" }, {title: "Show me another!", payload: "SHOW_ANOTHER" }]}
+      { ref: options[counter].ref, buttons: [postbackButton(title="I like this one!", payload="LIKE_THIS"), postbackButton(title="Show me another!", payload="SHOW_ANOTHER")]}
     ]
   );
 };
@@ -180,7 +197,7 @@ const likeThisOne = (sender_psid) => {
   );
 };
   
-const displayChoices = (sender_psid) => {
+const displayChoices = async (sender_psid) => {
   let payloadToText = {
     "MATERIAL_DIAMOND": "diamond",
     "MATERIAL_ONYX": "onyx",
@@ -194,10 +211,10 @@ const displayChoices = (sender_psid) => {
     "METAL_WHITE_GOLD": "white gold",
     "METAL_PINK_GOLD": "pink gold",
     "METAL_PLATINUM": "platinum",
-    "ITEMS_RINGS": "ring",
-    "ITEMS_BRACELETS": "bracelet",
-    "ITEMS_EARRINGS": "earring",
-    "ITEMS_NECKLACES": "necklace"
+    "ITEMS_RINGS": "rings",
+    "ITEMS_BRACELETS": "bracelets",
+    "ITEMS_EARRINGS": "earrings",
+    "ITEMS_NECKLACES": "necklaces"
   };
 
   options = searchItems(
@@ -211,19 +228,39 @@ const displayChoices = (sender_psid) => {
   counter = 0;
 
   if (options.length > 0){
+    for (let i = 0; i < options.length; i++) {
+      var response = await POST(
+        "https://graph.facebook.com/v7.0/me/message_attachments?access_token=" + process.env.PAGE_ACCESS_TOKEN,
+        {
+          message: {
+            attachment: {
+              type: "image",
+              payload: {
+                is_reusable: true,
+                url: "https://www.cartier.com" + options[i].image
+              }
+            }
+          }
+        } 
+      );
+
+      REFERENCE[options[i].ref] = response.data.attachment_id;
+    }
+
+    console.log(REFERENCE);
+
     iterateChoices(sender_psid);
   }
   else {
     sendQuickText(
       sender_psid,
-      "I am afraid we do not have this item in stock. Would you like to try again or speak to an agent?",
+      "I am afraid we do not have this item in stock right now. Would you like to try again or speak to an agent?",
       [
         { title: "Try again", payload: "START" },
         { title: "Speak to an agent", payload: "SPEAK_AGENT" }
       ]
     )
   }
-
 };
 
 const talkToAgent = (sender_psid) => {
@@ -325,19 +362,29 @@ const postbackButton = (title, payload) => {
   }
 };
 
+const POST = async (url, data) => {
+  return await axios({
+    method: "post", 
+    url: url,
+    data: data,
+  })
+};
+
 const sendQuickMediaMessage = (sender_psid, quickReplies) => {
   const attachment = {
       type: "template",
       payload: {
         template_type: "media",
         elements:
-          quickReplies.map(({ url, buttons }) => ({
+          quickReplies.map(({ ref, buttons }) => ({
             media_type: "image",
-            url: url,
+            attachment_id: REFERENCE[ref],
             buttons: buttons
           }))
       }
   };
+
+  console.log(attachment);
 
   return callSendAPI(sender_psid, { attachment });
 };

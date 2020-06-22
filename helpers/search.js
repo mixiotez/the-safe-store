@@ -8,9 +8,9 @@ const searchItems = (category="", maxPrice="", color="", stones="") => {
   console.log(filteredItems.length);
 
   if (category != "")
-    filteredItems = filteredItems.filter((item) => item.category.includes(category));
+    filteredItems = filteredItems.filter((item) => item.category === category);
 
-  console.log(filteredItems[0]);
+  console.log(filteredItems.length);
 
   if (maxPrice != "") {
     filteredItems = filteredItems.filter(
@@ -18,7 +18,7 @@ const searchItems = (category="", maxPrice="", color="", stones="") => {
     );
   }
 
-  console.log("bello" + filteredItems.length);
+  console.log(filteredItems.length);
 
   if (color != "")
     filteredItems = filteredItems.filter(
