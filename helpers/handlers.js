@@ -348,7 +348,7 @@ const sendQuickText = (sender_psid, text, quickReplies) => {
     image_url
   }));
 
-  return callSendAPI(sender_psid, { text, quick_replies });
+  return messageSendAPI(sender_psid, { text, quick_replies });
 };
 
 const postbackButton = (title, payload) => {
@@ -384,14 +384,14 @@ const sendQuickMediaMessage = (sender_psid, quickReplies) => {
 
   console.log(attachment);
 
-  return callSendAPI(sender_psid, { attachment });
+  return messageSendAPI(sender_psid, { attachment });
 };
 
 const sendTextMessage = (sender_psid, text) =>
-  callSendAPI(sender_psid, { text });
+  messageSendAPI(sender_psid, { text });
 
 // Sends response messages via the Send API
-const callSendAPI = (sender_psid, response) => {
+const messageSendAPI = (sender_psid, response) => {
   // console.log("Sending message: " + sender_psid);
   // console.log(response);
   axios({
