@@ -84,4 +84,17 @@ const handleResponse = async (sender_psid, received_message) => {
   }
 };
 
-module.exports = handleResponse;
+const handlePostback = (sender_psid, postback)  => {
+  if (postback.payload){
+    switch(postback.payload){
+      case 'SHOW_ANOTHER':
+        handlers.showAnother(sender_psid);
+        break;
+      case 'LIKE_THIS':
+        handlers.likeThisOne(sender_psid);
+        break;
+    }
+  }
+};
+
+module.exports = { handleResponse, handlePostback };

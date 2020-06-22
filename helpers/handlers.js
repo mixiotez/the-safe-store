@@ -3,8 +3,6 @@ const axios = require("axios"),
       { USER_CHOICES } = require('./user_choices');
 const { response } = require("express");
 
-const exec = require('child_process').exec;
-
 var options = []; // Options that are filtered by the choice tree, globals
 var counter = 0;
 var REFERENCE = {};
@@ -50,12 +48,11 @@ const handleGreeting = async (sender_psid, received_message) => {
 };
 
 const sendStartMessage = (sender_psid) => {
-  USER_CHOICES = {
-    'ITEM': '',
-    'PRICE': '',
-    'MATERIAL': '',
-    'METAL': ''
-  };
+  USER_CHOICES['ITEM'] = "";
+  USER_CHOICES["PRICE"] = "";
+  USER_CHOICES["MATERIAL"] = "";
+  USER_CHOICES["METAL"] = "";
+
   sendQuickText(
     sender_psid,
     "Alright! Do you want to shop by item category, price, or metal color?",
@@ -177,7 +174,7 @@ const iterateChoices = (sender_psid) => {
   sendQuickMediaMessage(
     sender_psid,
     [
-      { ref: options[counter].ref, buttons: [postbackButton(title="I like this one!", payload="LIKE_THIS"), postbackButton(title="Show me another!", payload="SHOW_ANOTHER")]}
+      { title: options[counter].title, subtitle: '$' + options[counter].price, url: "https://www.cartier.com" + options[counter].image, buttons: [postbackButton(title="I like this one!", payload="LIKE_THIS"), postbackButton(title="Show me another!", payload="SHOW_ANOTHER")]}
     ]
   );
 };
@@ -374,11 +371,12 @@ const sendQuickMediaMessage = (sender_psid, quickReplies) => {
   const attachment = {
       type: "template",
       payload: {
-        template_type: "media",
+        template_type: "generic",
         elements:
-          quickReplies.map(({ ref, buttons }) => ({
-            media_type: "image",
-            attachment_id: REFERENCE[ref],
+          quickReplies.map(({ title, subtitle, url, buttons }) => ({
+            title: title,
+            subtitle: subtitle,
+            image_url: url,
             buttons: buttons
           }))
       }

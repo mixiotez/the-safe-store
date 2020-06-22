@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const handleResponse = require('../helpers/response');
+const { handleResponse, handlePostback } = require('../helpers/response');
+const handlers = require('../helpers/handlers');
 
 router.post('/webhook', (req, res) => {
   const body = req.body;
@@ -14,6 +15,9 @@ router.post('/webhook', (req, res) => {
 
     if (webhook_event.message) {
       handleResponse(sender_psid, webhook_event.message);
+    }
+    else if (webhook_event.postback) {
+      handlePostback(sender_psid, webhook_event.postback);
     }
   });
 
