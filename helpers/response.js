@@ -7,11 +7,7 @@ const { chooser } = require('./handlers.js');
 const handleResponse = async (sender_psid, received_message) => {
   console.log(received_message);
 
-  const greeting = received_message.nlp.traits.greetings
-    ? received_message.nlp.traits.greetings[0]
-    : "";
-
-  if ((greeting && greeting.confidence > 0.7) || received_message.text === "Restart") {
+  if (received_message.text === "Restart" || received_message.text === "restart") {
     handlers.handleGreeting(sender_psid, received_message);
   }
   else {
@@ -20,11 +16,17 @@ const handleResponse = async (sender_psid, received_message) => {
         case 'START': 
           handlers.sendStartMessage(sender_psid);
           break;
+        case 'CONTINUE':
+          chooser(nextChoice(), sender_psid);
+          break;
+        case 'SPEAK_AGENT':
+          handlers.talkToAgent(sender_psid);
+          break;
+        case 'MORE_INFORMATION':
+          handlers.moreInfo(sender_psid);
+          break;
         case 'SHOP_BY_ITEM':
           chooser('ITEM', sender_psid);
-          break;
-        case 'SHOP_BY_GENDER':
-          chooser('GENDER', sender_psid);
           break;
         case 'SHOP_BY_PRICE':
           chooser('PRICE', sender_psid);
@@ -37,12 +39,6 @@ const handleResponse = async (sender_psid, received_message) => {
         case 'ITEMS_NECKLACES':
         case 'ITEMS_EARRINGS':
           addChoice('ITEM', received_message.quick_reply.payload);
-          chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
-          break;
-        case 'GENDER_MEN':
-        case 'GENDER_WOMEN':
-        case 'GENDER_NEUTRAL':
-          addChoice('GENDER', received_message.quick_reply.payload);
           chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
           break;
         case 'MATERIAL_DIAMOND':
@@ -65,6 +61,17 @@ const handleResponse = async (sender_psid, received_message) => {
         case 'METAL_PLATINUM':
           addChoice('METAL', received_message.quick_reply.payload);
           chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
+          break;
+        case 'RATING_GREAT':
+        case 'RATING_OK':
+        case 'RATING_BAD':
+          handlers.ratingReceived(sender_psid);
+          break;
+        case 'SHOW_ANOTHER':
+          handlers.showAnother(sender_psid);
+          break;
+        case 'LIKE_THIS':
+          handlers.likeThisOne(sender_psid);
           break;
         default:
           handlers.messageUnrecognized(sender_psid);

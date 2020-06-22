@@ -1,5 +1,9 @@
 const axios = require("axios"),
+      { searchItems } = require("./search.js"),
       { USER_CHOICES } = require('./user_choices');
+
+var options = []; // Options that are filtered by the choice tree, globals
+var counter = 0;
 
 const handleGreeting = async (sender_psid, received_message) => {
   // Retrieves user's first name
@@ -16,7 +20,7 @@ const handleGreeting = async (sender_psid, received_message) => {
 
   sendTextMessage(
     sender_psid,
-    `Welcome to The Safe Store, ${userName}. We appreciate your preference!`
+    `Welcome to The Safe Store, ${userName}. We appreciate you choosing us!`
   );
   setTimeout(
     () =>
@@ -28,11 +32,12 @@ const handleGreeting = async (sender_psid, received_message) => {
   );
   setTimeout(
     () =>
-      sendQuickReplies(
+      sendQuickText(
         sender_psid,
         "Please select from the following options:",
         [
           { title: "Start Shopping 🛍️", payload: "START" },
+          { title: "Speak to an agent", payload: "SPEAK_AGENT" },
           { title: "More Information ℹ️", payload: "MORE_INFORMATION" },
         ]
       ),
@@ -41,57 +46,64 @@ const handleGreeting = async (sender_psid, received_message) => {
 };
 
 const sendStartMessage = (sender_psid) => {
-  sendQuickReplies(
+  sendQuickText(
     sender_psid,
-    "Alright! Do you want to shop by item, price, color, or gender?",
+    "Alright! Do you want to shop by item category, price, or metal color?",
     [
-      { title: "By item", payload: "SHOP_BY_ITEM" },
+      { title: "By category", payload: "SHOP_BY_ITEM" },
       { title: "By price", payload: "SHOP_BY_PRICE" },
       { title: "By color", payload: "SHOP_BY_COLOR" },
-      { title: "By gender", payload: "SHOP_BY_GENDER" },
       { title: "Restart", payload: "START" }
     ]
   );
 };
 
 const chooseItems = (sender_psid) => {
-  sendQuickReplies(
+  sendQuickText(
     sender_psid,
     "No problem! What are you looking to buy?",
     [
-      { title: "Rings", payload: "ITEMS_RINGS" },
-      { title: "Bracelets", payload: "ITEMS_BRACELETS" },
-      { title: "Necklaces", payload: "ITEMS_NECKLACES" },
-      { title: "Earrings", payload: "ITEMS_EARRINGS" },
+      { title: "Rings", payload: "ITEMS_RINGS" , image_url: "https://static.diamondsbyme.com/lsjqb/product/6904308790-FEM2-RINGS-0.A-YG.B-DI-RND-V0.JPG" },
+      { title: "Bracelets", payload: "ITEMS_BRACELETS", image_url: "https://images-na.ssl-images-amazon.com/images/I/612DA0LO7oL._AC_UL1500_.jpg" },
+      { title: "Necklaces", payload: "ITEMS_NECKLACES", image_url: "https://asset.swarovski.com/images/$size_1450/t_swa103/b_rgb:fafafa,c_scale,dpr_3.0,f_auto,w_500/5518868_png/swarovski-infinity-double-heart-necklace--white--mixed-metal-finish-swarovski-5518868.png" },
+      { title: "Earrings", payload: "ITEMS_EARRINGS", image_url: "https://images-na.ssl-images-amazon.com/images/I/71NnFhMamIL._UY395_.jpg" },
       { title: "Restart", payload: "START" }
     ]
   )
 };
 
 const chooseMetal = (sender_psid) => {
-  sendQuickReplies(
+  sendQuickText(
     sender_psid,
-    `Good choice!
-Cartier sells primarily 4 alloys:
+    `Good choice! 
+    
+Cartier sells primarily 4 following alloys:
 
-- Yellow gold: Yellow gold is made of pure gold mixed with alloy metals such as copper and zinc
-- White gold: White gold is an alloy of gold and at least one white metal (usually nickel, silver, or palladium)
-- Pink gold: Also know as rose gold, pink gold is made of pure gold mixed with copper and silver alloys
-- Platinum: 95-98% Platinum
+- Yellow gold: 
+Yellow gold is made of pure gold mixed with alloy metals such as copper and zinc
+
+- White gold: 
+White gold is an alloy of gold and at least one white metal (usually nickel, silver, or palladium)
+
+- Pink gold: 
+Also know as rose gold, pink gold is made of pure gold mixed with copper and silver alloys
+
+- Platinum: 
+95-98% Platinum
 
 What metal do you fancy most?`,
     [
-      { title: "Yellow gold", payload: "METAL_YELLOW_GOLD" },
-      { title: "White gold", payload: "METAL_WHITE_GOLD" },
-      { title: "Pink gold", payload: "METAL_PINK_GOLD" },
-      { title: "Platinum", payload: "METAL_PLATINUM" },
+      { title: "Yellow gold", payload: "METAL_YELLOW_GOLD", image_url: "https://www.colorcombos.com/images/colors/FFD80A.png"},
+      { title: "White gold", payload: "METAL_WHITE_GOLD", image_url: "https://cdn.shopify.com/s/files/1/0405/8713/products/white_gold_a4_8252ef35-4176-4965-8d83-9aa0b72f0bc6_2048x.jpg?v=1406364517" },
+      { title: "Rose gold", payload: "METAL_PINK_GOLD",  image_url: "https://www.colorhexa.com/e6c2b4.png" },
+      { title: "Platinum", payload: "METAL_PLATINUM", image_url: "https://www.solidbackgrounds.com/images/2048x2048/2048x2048-platinum-solid-color-background.jpg" },
       { title: "Restart", payload: "START" }
     ]
   )
 };
 
 const chooseGender = (sender_psid) => {
-  sendQuickReplies(
+  sendQuickText(
     sender_psid,
     "What style are you buying?",
     [
@@ -104,38 +116,38 @@ const chooseGender = (sender_psid) => {
 };
 
 const choosePrice = (sender_psid) => {
-  sendQuickReplies(
+  sendQuickText(
     sender_psid,
     "Sounds good, how much are you willing to spend?",
     [
-      { title: "<$2500", payload: "PRICE_LESS_2500" },
-      { title: "$2500-$10K", payload: "PRICE_2500_10K" },
-      { title: "$10K-$25K", payload: "PRICE_10K_25K" },
-      { title: ">$25K", payload: "PRICE_25K_MORE"},
+      { title: "< $2500", payload: "PRICE_LESS_2500" },
+      { title: "Up to $10K", payload: "PRICE_2500_10K" },
+      { title: "Up to $25K", payload: "PRICE_10K_25K" },
+      { title: "> $25K", payload: "PRICE_25K_MORE"},
       { title: "Restart", payload: "START" }
     ]
-  )
+  );
 };
 
 const chooseMaterials = (sender_psid) => {
-  sendQuickReplies(
-    sender_psid,
-    "Awesome, how about materials?",
+  sendQuickText(
+    sender_psid, 
+    "Awesome! How about materials?",
     [
-      { title: "Diamonds", payload: "MATERIAL_DIAMOND" },
-      { title: "Onyx", payload: "MATERIAL_ONYX" },
-      { title: "Emerald", payload: "MATERIAL_EMERALD" },
-      { title: "Other", payload: "MATERIAL_OTHER" },
-      { title: "Restart", payload: "START" }
+      { title: "Diamond", payload: "MATERIAL_DIAMOND", image_url: "https://images-na.ssl-images-amazon.com/images/I/615HMgt2EoL._UL1500_.jpg" },
+      { title: "Onyx", payload: "MATERIAL_ONYX", image_url: "https://thewifechoice.com/wp-content/uploads/2019/12/Black-Onyx-Meaning-stone.jpg" },
+      { title: "Emerald", payload: "MATERIAL_EMERALD", image_url: "https://www.gemsociety.org/wp-content/uploads/2013/09/51561341_1_x.jpg" },
+      { title: "Other", payload: "MATERIAL_OTHER", image_url: "https://financesonline.com/uploads/2014/05/gem.png" }
     ]
-  )
+  );
 };
 
 const messageUnrecognized = (sender_psid) => {
-  sendTextMessage(sender_psid, "I'm sorry, this is not one of my commands.");
-  sendQuickReplies(
+  sendQuickText(
     sender_psid,
-    "Please select from the following options:",
+    `I'm sorry, this is not one of my commands.
+
+Please select from the following options:`,
     [
       { title: "Restart", payload: "START" },
       { title: "Speak to an agent", payload: "SPEAK_AGENT" },
@@ -143,12 +155,122 @@ const messageUnrecognized = (sender_psid) => {
     ]
   );
 };
+
+const iterateChoices = (sender_psid) => {
+  sendQuickMediaMessage(
+    sender_psid,
+    [
+      { url: options[counter].image, buttons: [{title: "I like this one!", payload: "LIKE_THIS" }, {title: "Show me another!", payload: "SHOW_ANOTHER" }]}
+    ]
+  );
+};
+
+const showAnother = (sender_psid) => {
+  ++counter;
+  iterateChoices(sender_psid);
+};
+
+const likeThisOne = (sender_psid) => {
+  sendQuickText(
+    sender_psid,
+    "Thanks for using the Safe Store. Our representative will bring the selected product to you momentarily!",
+    [
+      { title: "Shop again!", payload: "START" }
+    ]
+  );
+};
   
 const displayChoices = (sender_psid) => {
-  sendTextMessage(
+  let payloadToText = {
+    "MATERIAL_DIAMOND": "diamond",
+    "MATERIAL_ONYX": "onyx",
+    "MATERIAL_EMERALD": "emerald",
+    "MATERIAL_OTHER": "OTHER",
+    "PRICE_LESS_2500": "2500",
+    "PRICE_2500_10K": "10000",
+    "PRICE_10K_25K": "25000",
+    "PRICE_25K_MORE": "370000",
+    "METAL_YELLOW_GOLD": "yellow gold",
+    "METAL_WHITE_GOLD": "white gold",
+    "METAL_PINK_GOLD": "pink gold",
+    "METAL_PLATINUM": "platinum",
+    "ITEMS_RINGS": "ring",
+    "ITEMS_BRACELETS": "bracelet",
+    "ITEMS_EARRINGS": "earring",
+    "ITEMS_NECKLACES": "necklace"
+  };
+
+  options = searchItems(
+    payloadToText[USER_CHOICES['ITEM']], 
+    payloadToText[USER_CHOICES['PRICE']],
+    payloadToText[USER_CHOICES['METAL']],
+    payloadToText[USER_CHOICES['MATERIAL']]
+  );
+
+  console.log(options);
+  counter = 0;
+
+  if (options.length > 0){
+    iterateChoices(sender_psid);
+  }
+  else {
+    sendQuickText(
+      sender_psid,
+      "I am afraid we do not have this item in stock. Would you like to try again or speak to an agent?",
+      [
+        { title: "Try again", payload: "START" },
+        { title: "Speak to an agent", payload: "SPEAK_AGENT" }
+      ]
+    )
+  }
+
+};
+
+const talkToAgent = (sender_psid) => {
+  setTimeout(
+    () => {
+      sendTextMessage(
+        sender_psid,
+        "Hi there, my name is Daniel. How can I help you today?"
+      );
+    },
+    4000
+  );
+
+  setTimeout(
+    () => {
+      sendQuickText(
+        sender_psid,
+        "Thanks for using the Safe Store. Please rate the agent you just spoke to.",
+        [
+          { title: "Great", payload: "RATING_GREAT" },
+          { title: "OK", payload: "RATING_OK" },
+          { title: "Bad", payload: "RATING_BAD" }
+        ]
+      );
+    },
+    8000
+  );
+};
+
+const ratingReceived = (sender_psid) => {
+  sendQuickText(
     sender_psid,
-    'Your item: ' + USER_CHOICES['ITEM'] + '\n' + 'Your gender: ' + USER_CHOICES['GENDER'] + '\n' + 
-    'Your metal: ' + USER_CHOICES['METAL'] + '\n' + 'Your material: ' + USER_CHOICES['MATERIAL'] + '\n' + 'Your budget: ' + USER_CHOICES['PRICE'] 
+    "Your feedback was recorded. Have a great day!",
+    [
+      { title: "Shop again", payload: "START" }
+    ]
+  );
+};
+
+const moreInfo = (sender_psid) => {
+  sendQuickText(
+    sender_psid,
+    "This is a submission for the Facebook Messaging Hackathon. You can find our privacy policy at https://the-safe-store.herokuapp.com/privacy.",
+    [
+      { title: "Continue shopping", payload: "START" },
+      { title: "Speak to an agent", payload: "SPEAK_AGENT" }
+    ]
   );
 };
 
@@ -172,9 +294,6 @@ const chooser = (category, sender_psid) => {
     case 'METAL':
       chooseMetal(sender_psid);
       break;
-    case 'GENDER':
-      chooseGender(sender_psid);
-      break;
     case 'FINISHED':
       displayChoices(sender_psid);
       break;
@@ -187,14 +306,40 @@ const chooser = (category, sender_psid) => {
 
 // ------------------------ Generic functions --------------------- //
 
-const sendQuickReplies = (sender_psid, text, quickReplies) => {
-  const quick_replies = quickReplies.map(({ title, payload }) => ({
+const sendQuickText = (sender_psid, text, quickReplies) => {
+  const quick_replies = quickReplies.map(({ title, payload, image_url="" }) => ({
     content_type: "text",
     title,
     payload,
+    image_url
   }));
 
   return callSendAPI(sender_psid, { text, quick_replies });
+};
+
+const postbackButton = (title, payload) => {
+  return {
+    type: "postback",
+    title: title,
+    payload: payload
+  }
+};
+
+const sendQuickMediaMessage = (sender_psid, quickReplies) => {
+  const attachment = {
+      type: "template",
+      payload: {
+        template_type: "media",
+        elements:
+          quickReplies.map(({ url, buttons }) => ({
+            media_type: "image",
+            url: url,
+            buttons: buttons
+          }))
+      }
+  };
+
+  return callSendAPI(sender_psid, { attachment });
 };
 
 const sendTextMessage = (sender_psid, text) =>
@@ -217,4 +362,4 @@ const callSendAPI = (sender_psid, response) => {
   }).catch((err) => console.log("Send API error: ", err));
 };
 
-module.exports = { handleGreeting, sendStartMessage, messageUnrecognized, chooser }
+module.exports = { handleGreeting, sendStartMessage, messageUnrecognized, chooser, talkToAgent, ratingReceived, moreInfo, iterateChoices, likeThisOne, showAnother }
