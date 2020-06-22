@@ -225,26 +225,26 @@ const displayChoices = async (sender_psid) => {
   counter = 0;
 
   if (options.length > 0){
-    for (let i = 0; i < options.length; i++) {
-      var response = await POST(
-        "https://graph.facebook.com/v7.0/me/message_attachments?access_token=" + process.env.PAGE_ACCESS_TOKEN,
-        {
-          message: {
-            attachment: {
-              type: "image",
-              payload: {
-                is_reusable: true,
-                url: "https://www.cartier.com" + options[i].image
-              }
-            }
-          }
-        } 
-      );
+    // for (let i = 0; i < options.length; i++) {
+    //   var response = await POST(
+    //     "https://graph.facebook.com/v7.0/me/message_attachments?access_token=" + process.env.PAGE_ACCESS_TOKEN,
+    //     {
+    //       message: {
+    //         attachment: {
+    //           type: "image",
+    //           payload: {
+    //             is_reusable: true,
+    //             url: "https://www.cartier.com" + options[i].image
+    //           }
+    //         }
+    //       }
+    //     } 
+    //   );
 
-      REFERENCE[options[i].ref] = response.data.attachment_id;
-    }
+    //   REFERENCE[options[i].ref] = response.data.attachment_id;
+    // }
 
-    console.log(REFERENCE);
+    // console.log(REFERENCE);
 
     iterateChoices(sender_psid);
   }
