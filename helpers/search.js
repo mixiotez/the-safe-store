@@ -1,6 +1,6 @@
 const data = require("../cartier_catalog.json");
 
-const searchItems = (category="", maxPrice="", color="", stones="") => {
+const searchItems = (category = "", maxPrice = "", color = "", stones = "") => {
   let filteredItems = data;
 
   maxPrice = parseInt(maxPrice, 10);
@@ -13,9 +13,7 @@ const searchItems = (category="", maxPrice="", color="", stones="") => {
   console.log(filteredItems.length);
 
   if (maxPrice != "") {
-    filteredItems = filteredItems.filter(
-      (item) => (item.price <= maxPrice)
-    );
+    filteredItems = filteredItems.filter((item) => item.price <= maxPrice);
   }
 
   console.log(filteredItems.length);
@@ -27,13 +25,16 @@ const searchItems = (category="", maxPrice="", color="", stones="") => {
 
   console.log(filteredItems.length);
 
-  if (stones != ""){ 
-    if (stones == "OTHER"){
+  if (stones != "") {
+    if (stones == "OTHER") {
       filteredItems = filteredItems.filter(
-        (item) => item.description && (!item.description.includes("diamond") && !item.description.includes("emerald") && !item.description.includes("onyx"))
+        (item) =>
+          item.description &&
+          !item.description.includes("diamond") &&
+          !item.description.includes("emerald") &&
+          !item.description.includes("onyx")
       );
-    }
-    else {
+    } else {
       filteredItems = filteredItems.filter(
         (item) => item.description && item.description.includes(stones)
       );
