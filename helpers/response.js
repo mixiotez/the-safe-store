@@ -1,11 +1,8 @@
-const axios = require("axios"),
-  handlers = require("./handlers.js"),
-  { nextChoice, addChoice } = require("./user_choices.js");
+const handlers = require("./handlers.js");
+const { nextChoice, addChoice } = require("./user_choices.js");
 const { chooser } = require("./handlers.js");
 
-// Handles the entire response
 const handleResponse = async (sender_psid, received_message) => {
-  console.log(received_message);
   try {
     switch (received_message.quick_reply.payload) {
       case "GET_STARTED":
@@ -76,6 +73,7 @@ const handleResponse = async (sender_psid, received_message) => {
         break;
     }
   } catch (err) {
+    console.log(err);
     handlers.messageUnrecognized(sender_psid);
   }
 };
@@ -84,7 +82,7 @@ const handlePostback = (sender_psid, postback) => {
   if (postback.payload) {
     switch (postback.payload) {
       case "GET_STARTED":
-        handlers.handleGreeting(sender_psid, received_message);
+        handlers.handleGreeting(sender_psid);
         break;
       case "SHOW_ANOTHER":
         handlers.showAnother(sender_psid);

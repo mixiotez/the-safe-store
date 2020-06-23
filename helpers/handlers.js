@@ -7,7 +7,7 @@ var options = []; // Options that are filtered by the choice tree, globals
 var counter = 0;
 var REFERENCE = {};
 
-const handleGreeting = async (sender_psid, received_message) => {
+const handleGreeting = async (sender_psid) => {
   // Retrieves user's first name
   const userName = await axios({
     method: "GET",
@@ -22,24 +22,24 @@ const handleGreeting = async (sender_psid, received_message) => {
 
   sendTextMessage(
     sender_psid,
-    `Welcome to The Safe Store, ${userName}. We appreciate you choosing us!`
+    `Welcome to The Safe Store, ${userName}. We appreciate your preference!`
   );
   setTimeout(
     () =>
       sendTextMessage(
         sender_psid,
-        'Feel free to type "Restart" at any time to restart your shopping experience.'
+        'Feel free to type "Restart" at any time to start over your shopping experience.'
       ),
-    2000
+    4000
   );
   setTimeout(
     () =>
       sendQuickText(sender_psid, "Please select from the following options:", [
         { title: "Start Shopping 🛍️", payload: "START" },
-        { title: "Speak to an agent", payload: "SPEAK_AGENT" },
+        { title: "Speak with an Agent 💬", payload: "SPEAK_AGENT" },
         { title: "More Information ℹ️", payload: "MORE_INFORMATION" },
       ]),
-    4000
+    9500
   );
 };
 
@@ -51,18 +51,18 @@ const sendStartMessage = (sender_psid) => {
 
   sendQuickText(
     sender_psid,
-    "Alright! Do you want to shop by item category, price, or metal color?",
+    "Alright! Do you want to browse by category, price, or color?",
     [
-      { title: "By category", payload: "SHOP_BY_ITEM" },
-      { title: "By price", payload: "SHOP_BY_PRICE" },
-      { title: "By color", payload: "SHOP_BY_COLOR" },
+      { title: "By Category", payload: "SHOP_BY_ITEM" },
+      { title: "By Price", payload: "SHOP_BY_PRICE" },
+      { title: "By Color", payload: "SHOP_BY_COLOR" },
       { title: "Restart", payload: "START" },
     ]
   );
 };
 
 const chooseItems = (sender_psid) => {
-  sendQuickText(sender_psid, "No problem! What are you looking to buy?", [
+  sendQuickText(sender_psid, "What type of jewelry are you looking for?", [
     {
       title: "Rings",
       payload: "ITEMS_RINGS",
@@ -92,50 +92,63 @@ const chooseItems = (sender_psid) => {
 };
 
 const chooseMetal = (sender_psid) => {
-  sendQuickText(
-    sender_psid,
-    `Good choice! 
-    
-Cartier sells primarily 4 following alloys:
-
-- Yellow gold: 
-Yellow gold is made of pure gold mixed with alloy metals such as copper and zinc
-
-- White gold: 
-White gold is an alloy of gold and at least one white metal (usually nickel, silver, or palladium)
-
-- Pink gold: 
-Also know as rose gold, pink gold is made of pure gold mixed with copper and silver alloys
-
-- Platinum: 
-95-98% Platinum
-
-What metal do you fancy most?`,
-    [
-      {
-        title: "Yellow gold",
-        payload: "METAL_YELLOW_GOLD",
-        image_url: "https://www.colorcombos.com/images/colors/FFD80A.png",
-      },
-      {
-        title: "White gold",
-        payload: "METAL_WHITE_GOLD",
-        image_url:
-          "https://cdn.shopify.com/s/files/1/0405/8713/products/white_gold_a4_8252ef35-4176-4965-8d83-9aa0b72f0bc6_2048x.jpg?v=1406364517",
-      },
-      {
-        title: "Rose gold",
-        payload: "METAL_PINK_GOLD",
-        image_url: "https://www.colorhexa.com/e6c2b4.png",
-      },
-      {
-        title: "Platinum",
-        payload: "METAL_PLATINUM",
-        image_url:
-          "https://www.solidbackgrounds.com/images/2048x2048/2048x2048-platinum-solid-color-background.jpg",
-      },
-      { title: "Restart", payload: "START" },
-    ]
+  sendTextMessage(sender_psid, "Cartier offers the following 4 alloys:");
+  setTimeout(
+    () =>
+      sendTextMessage(
+        sender_psid,
+        "Yellow gold: pure gold mixed with metals such as copper and zinc."
+      ),
+    4400
+  );
+  setTimeout(
+    () =>
+      sendTextMessage(
+        sender_psid,
+        "White gold: gold mixed with at least one white metal, usually nickel, silver, or palladium."
+      ),
+    9400
+  );
+  setTimeout(
+    () =>
+      sendTextMessage(
+        sender_psid,
+        "Pink/Rose gold: pure gold mixed with copper and silver."
+      ),
+    14000
+  );
+  setTimeout(
+    () => sendTextMessage(sender_psid, "Platinum: 95-98% platinum mixture."),
+    16000
+  );
+  setTimeout(
+    () =>
+      sendQuickText(sender_psid, "What metal do you fancy most?", [
+        {
+          title: "Yellow Gold",
+          payload: "METAL_YELLOW_GOLD",
+          image_url: "https://www.colorcombos.com/images/colors/FFD80A.png",
+        },
+        {
+          title: "White Gold",
+          payload: "METAL_WHITE_GOLD",
+          image_url:
+            "https://cdn.shopify.com/s/files/1/0405/8713/products/white_gold_a4_8252ef35-4176-4965-8d83-9aa0b72f0bc6_2048x.jpg?v=1406364517",
+        },
+        {
+          title: "Pink/Rose Gold",
+          payload: "METAL_PINK_GOLD",
+          image_url: "https://www.colorhexa.com/e6c2b4.png",
+        },
+        {
+          title: "Platinum",
+          payload: "METAL_PLATINUM",
+          image_url:
+            "https://www.solidbackgrounds.com/images/2048x2048/2048x2048-platinum-solid-color-background.jpg",
+        },
+        { title: "Restart", payload: "START" },
+      ]),
+    18000
   );
 };
 
@@ -149,21 +162,17 @@ const chooseGender = (sender_psid) => {
 };
 
 const choosePrice = (sender_psid) => {
-  sendQuickText(
-    sender_psid,
-    "Sounds good, how much are you willing to spend?",
-    [
-      { title: "< $2500", payload: "PRICE_LESS_2500" },
-      { title: "Up to $10K", payload: "PRICE_2500_10K" },
-      { title: "Up to $25K", payload: "PRICE_10K_25K" },
-      { title: "> $25K", payload: "PRICE_25K_MORE" },
-      { title: "Restart", payload: "START" },
-    ]
-  );
+  sendQuickText(sender_psid, "What is your price range?", [
+    { title: "< $2500", payload: "PRICE_LESS_2500" },
+    { title: "Up to $10K", payload: "PRICE_2500_10K" },
+    { title: "Up to $25K", payload: "PRICE_10K_25K" },
+    { title: "> $25K", payload: "PRICE_25K_MORE" },
+    { title: "Restart", payload: "START" },
+  ]);
 };
 
 const chooseMaterials = (sender_psid) => {
-  sendQuickText(sender_psid, "Awesome! How about materials?", [
+  sendQuickText(sender_psid, "Which materials are you seeking?", [
     {
       title: "Diamond",
       payload: "MATERIAL_DIAMOND",
@@ -193,13 +202,11 @@ const chooseMaterials = (sender_psid) => {
 const messageUnrecognized = (sender_psid) => {
   sendQuickText(
     sender_psid,
-    `I'm sorry, this is not one of my commands.
-
-Please select from the following options:`,
+    `Sorry, I didn't get that. Please select one of the following options:`,
     [
       { title: "Restart", payload: "START" },
-      { title: "Speak to an agent", payload: "SPEAK_AGENT" },
-      { title: "Continue shopping", payload: "CONTINUE" },
+      { title: "Speak With an Agent", payload: "SPEAK_AGENT" },
+      { title: "Continue Shopping", payload: "CONTINUE" },
     ]
   );
 };
@@ -297,10 +304,10 @@ const displayChoices = async (sender_psid) => {
   } else {
     sendQuickText(
       sender_psid,
-      "I am afraid we do not have this item in stock right now. Would you like to try again or speak to an agent?",
+      "I'm afraid an item doesn't exist with these characteristics. Would you like to search again or speak with an agent?",
       [
-        { title: "Try again", payload: "START" },
-        { title: "Speak to an agent", payload: "SPEAK_AGENT" },
+        { title: "Search Again", payload: "START" },
+        { title: "Speak With an Agent", payload: "SPEAK_AGENT" },
       ]
     );
   }
@@ -338,8 +345,8 @@ const moreInfo = (sender_psid) => {
     sender_psid,
     "This is a submission for the Facebook Messaging Hackathon. You can find our privacy policy at https://the-safe-store.herokuapp.com/privacy.",
     [
-      { title: "Continue shopping", payload: "START" },
-      { title: "Speak to an agent", payload: "SPEAK_AGENT" },
+      { title: "Continue Shopping", payload: "START" },
+      { title: "Speak with an Agent", payload: "SPEAK_AGENT" },
     ]
   );
 };
@@ -428,8 +435,27 @@ const sendTextMessage = (sender_psid, text) =>
 
 // Sends response messages via the Send API
 const messageSendAPI = (sender_psid, response) => {
-  // console.log("Sending message: " + sender_psid);
-  // console.log(response);
+  callSenderActionAPI(sender_psid, "typing_on");
+
+  setTimeout(
+    () =>
+      axios({
+        method: "POST",
+        url: "https://graph.facebook.com/v7.0/me/messages",
+        params: { access_token: process.env.PAGE_ACCESS_TOKEN },
+        data: {
+          recipient: {
+            id: sender_psid,
+          },
+          message: response,
+        },
+      }).catch((err) => console.log("Send API error: ", err)),
+    (response.text.split(" ").length / 2.75) * 1000
+  );
+};
+
+// Sends a "sender action"
+const callSenderActionAPI = (sender_psid, action) => {
   axios({
     method: "POST",
     url: "https://graph.facebook.com/v7.0/me/messages",
@@ -438,9 +464,9 @@ const messageSendAPI = (sender_psid, response) => {
       recipient: {
         id: sender_psid,
       },
-      message: response,
+      sender_action: action,
     },
-  }).catch((err) => console.log("Send API error: ", err));
+  }).catch((err) => console.log("Sender action API error: ", err));
 };
 
 module.exports = {
@@ -454,4 +480,5 @@ module.exports = {
   iterateChoices,
   likeThisOne,
   showAnother,
+  callSenderActionAPI,
 };
