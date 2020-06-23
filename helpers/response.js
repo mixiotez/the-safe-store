@@ -3,10 +3,20 @@ const { nextChoice, addChoice } = require("./user_choices.js");
 const { chooser } = require("./handlers.js");
 
 const handleResponse = async (sender_psid, received_message) => {
+  const greeting = received_message.nlp.entities.greetings
+    ? received_message.nlp.entities.greetings[0]
+    : "";
+
+  if (
+    (greeting && greeting.confidence > 0.7) ||
+    received_message.text === "Restart"
+  )
+    return handlers.handleGreeting(sender_psid);
+
   try {
     switch (received_message.quick_reply.payload) {
       case "GET_STARTED":
-        handlers.handleGreeting(sender_psid, received_message);
+        handlers.handleGreeting(sender_psid);
         break;
       case "START":
         handlers.sendStartMessage(sender_psid);
@@ -30,6 +40,7 @@ const handleResponse = async (sender_psid, received_message) => {
       case "ITEMS_BRACELETS":
       case "ITEMS_NECKLACES":
       case "ITEMS_EARRINGS":
+      case "ITEMS_ANY":
         addChoice("ITEM", received_message.quick_reply.payload);
         chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
         break;
@@ -37,6 +48,7 @@ const handleResponse = async (sender_psid, received_message) => {
       case "MATERIAL_ONYX":
       case "MATERIAL_EMERALD":
       case "MATERIAL_OTHER":
+      case "MATERIAL_ANY":
         addChoice("MATERIAL", received_message.quick_reply.payload);
         chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
         break;
@@ -51,6 +63,7 @@ const handleResponse = async (sender_psid, received_message) => {
       case "METAL_WHITE_GOLD":
       case "METAL_PINK_GOLD":
       case "METAL_PLATINUM":
+      case "METAL_ANY":
         addChoice("METAL", received_message.quick_reply.payload);
         chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
         break;
@@ -71,7 +84,7 @@ const handleResponse = async (sender_psid, received_message) => {
 };
 
 const handlePostback = (sender_psid, postback) => {
-  if (postback.payload) {
+  if (postback.payload)
     switch (postback.payload) {
       case "GET_STARTED":
         handlers.handleGreeting(sender_psid);
@@ -92,7 +105,6 @@ const handlePostback = (sender_psid, postback) => {
         handlers.messageUnrecognized(sender_psid);
         break;
     }
-  }
 };
 
 module.exports = { handleResponse, handlePostback };

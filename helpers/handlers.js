@@ -28,7 +28,7 @@ const handleGreeting = async (sender_psid) => {
         sender_psid,
         'Feel free to type "Restart" at any time to start over your shopping experience.'
       ),
-    4000
+    3700
   );
   setTimeout(
     () =>
@@ -36,7 +36,7 @@ const handleGreeting = async (sender_psid) => {
         { title: "Start Shopping 🛍️", payload: "START" },
         { title: "More Information ℹ️", payload: "MORE_INFORMATION" },
       ]),
-    9500
+    9000
   );
 };
 
@@ -83,6 +83,10 @@ const chooseItems = (sender_psid) => {
       payload: "ITEMS_EARRINGS",
       image_url:
         "https://images-na.ssl-images-amazon.com/images/I/71NnFhMamIL._UY395_.jpg",
+    },
+    {
+      title: "Any",
+      payload: "ITEMS_ANY",
     },
     { title: "Restart", payload: "START" },
   ]);
@@ -143,6 +147,10 @@ const chooseMetal = (sender_psid) => {
           image_url:
             "https://www.solidbackgrounds.com/images/2048x2048/2048x2048-platinum-solid-color-background.jpg",
         },
+        {
+          title: "Any",
+          payload: "METAL_ANY",
+        },
         { title: "Restart", payload: "START" },
       ]),
     18000
@@ -193,6 +201,8 @@ const chooseMaterials = (sender_psid) => {
       payload: "MATERIAL_OTHER",
       image_url: "https://financesonline.com/uploads/2014/05/gem.png",
     },
+    { title: "Any", payload: "MATERIAL_ANY" },
+    { title: "Restart", payload: "START" },
   ]);
 };
 
@@ -215,14 +225,11 @@ const iterateChoices = (sender_psid) => {
   sendQuickMediaMessage(sender_psid, [
     {
       title: options[counter].title,
-      subtitle: "$" + options[counter].price,
+      subtitle: `$${options[counter].price} USD`,
       url: "https://www.cartier.com" + options[counter].image,
       buttons: [
-        postbackButton((title = "I like this one!"), (payload = "LIKE_THIS")),
-        postbackButton(
-          (title = "Show me another!"),
-          (payload = "SHOW_ANOTHER")
-        ),
+        postbackButton("I choose this one!", "LIKE_THIS"),
+        postbackButton("Show me another one!", "SHOW_ANOTHER"),
       ],
     },
   ]);
@@ -247,6 +254,7 @@ const displayChoices = async (sender_psid) => {
     MATERIAL_ONYX: "onyx",
     MATERIAL_EMERALD: "emerald",
     MATERIAL_OTHER: "OTHER",
+    MATERIAL_ANY: "",
     PRICE_LESS_2500: "2500",
     PRICE_2500_10K: "10000",
     PRICE_10K_25K: "25000",
@@ -255,10 +263,12 @@ const displayChoices = async (sender_psid) => {
     METAL_WHITE_GOLD: "white gold",
     METAL_PINK_GOLD: "pink gold",
     METAL_PLATINUM: "platinum",
+    METAL_ANY: "",
     ITEMS_RINGS: "rings",
     ITEMS_BRACELETS: "bracelets",
     ITEMS_EARRINGS: "earrings",
     ITEMS_NECKLACES: "necklaces",
+    ITEMS_ANY: "",
   };
 
   options = searchItems(
@@ -280,10 +290,26 @@ const displayChoices = async (sender_psid) => {
 };
 
 const moreInfo = (sender_psid) => {
-  sendQuickText(
+  sendTextMessage(
     sender_psid,
-    "This is a submission for the Facebook Messaging Hackathon. You can find our privacy policy at https://the-safe-store.herokuapp.com/privacy.",
-    [{ title: "Start Shopping", payload: "START" }]
+    "I am a chatbot that serve as a sales representative."
+  );
+  setTimeout(
+    () =>
+      sendTextMessage(
+        sender_psid,
+        "You only need to scan a QR code (or directly message me), login to Facebook's Messenger, and answer a set of questions related to which product you're looking for."
+      ),
+    3500
+  );
+  setTimeout(
+    () =>
+      sendQuickText(
+        sender_psid,
+        "Once you answer the questions, you'll receive all the items that match your query, and you can choose which one you want.",
+        [{ title: "Start Shopping", payload: "START" }]
+      ),
+    10000
   );
 };
 
@@ -333,8 +359,8 @@ const sendQuickText = (sender_psid, text, quickReplies) => {
 const postbackButton = (title, payload) => {
   return {
     type: "postback",
-    title: title,
-    payload: payload,
+    title,
+    payload,
   };
 };
 
@@ -360,6 +386,8 @@ const sendQuickMediaMessage = (sender_psid, quickReplies) => {
     },
   };
 
+  callSenderActionAPI(sender_psid, "typing_off");
+
   return messageSendAPI(sender_psid, { attachment });
 };
 
@@ -383,7 +411,7 @@ const messageSendAPI = (sender_psid, response) => {
           message: response,
         },
       }).catch((err) => console.log("Send API error: ", err)),
-    (response.text.split(" ").length / 2.75) * 1000
+    response.text ? (response.text.split(" ").length / 2.75) * 1000 : 0
   );
 };
 
