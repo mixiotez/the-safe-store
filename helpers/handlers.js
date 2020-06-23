@@ -3,7 +3,6 @@ const axios = require("axios"),
   { USER_CHOICES } = require("./user_choices");
 
 var options = []; // Options that are filtered by the choice tree, globals
-var counter = 0;
 
 const handleGreeting = async (sender_psid) => {
   // Retrieves user's first name
@@ -53,7 +52,6 @@ const sendStartMessage = (sender_psid) => {
       { title: "By Category", payload: "SHOP_BY_ITEM" },
       { title: "By Price", payload: "SHOP_BY_PRICE" },
       { title: "By Color", payload: "SHOP_BY_COLOR" },
-      { title: "Restart", payload: "START" },
     ]
   );
 };
@@ -157,15 +155,6 @@ const chooseMetal = (sender_psid) => {
   );
 };
 
-const chooseGender = (sender_psid) => {
-  sendQuickText(sender_psid, "What style are you buying?", [
-    { title: "For women", payload: "GENDER_WOMEN" },
-    { title: "For men", payload: "GENDER_MEN" },
-    { title: "Gender-neutral", payload: "GENDER_NEUTRAL" },
-    { title: "Restart", payload: "START" },
-  ]);
-};
-
 const choosePrice = (sender_psid) => {
   sendQuickText(sender_psid, "What is your price range?", [
     { title: "< $2500", payload: "PRICE_LESS_2500" },
@@ -218,25 +207,31 @@ const messageUnrecognized = (sender_psid) => {
 };
 
 const iterateChoices = (sender_psid) => {
-  if (counter >= options.length) {
-    counter = 0;
-  }
+  const elements = options.splice(0, 10).map(({ title, price, image }) => ({
+    title,
+    subtitle: `$${price} USD`,
+    image_url: `https://www.cartier.com${image}`,
+    buttons: [postbackButton("Bring me this one!", "LIKE_THIS")],
+  }));
 
-  sendQuickMediaMessage(sender_psid, [
-    {
-      title: options[counter].title,
-      subtitle: `$${options[counter].price} USD`,
-      url: "https://www.cartier.com" + options[counter].image,
-      buttons: [
-        postbackButton("I choose this one!", "LIKE_THIS"),
-        postbackButton("Show me another one!", "SHOW_ANOTHER"),
-      ],
-    },
-  ]);
+  sendQuickMediaMessage(sender_psid, elements);
+
+  let quickReplies = [{ title: "Start Over", payload: "START" }];
+
+  if (elements.length === 10 && options.length)
+    quickReplies.unshift({
+      title: "Show me more options",
+      payload: "SHOW_ANOTHER",
+    });
+
+  sendQuickText(
+    sender_psid,
+    "Please scroll through the options above, or select an option from the menu below",
+    quickReplies
+  );
 };
 
 const showAnother = (sender_psid) => {
-  ++counter;
   iterateChoices(sender_psid);
 };
 
@@ -244,7 +239,7 @@ const likeThisOne = (sender_psid) => {
   sendQuickText(
     sender_psid,
     "Thanks for using the Safe Store. Our representative will bring the selected product to you momentarily!",
-    [{ title: "Shop again!", payload: "START" }]
+    [{ title: "Browse again!", payload: "START" }]
   );
 };
 
@@ -278,9 +273,7 @@ const displayChoices = async (sender_psid) => {
     payloadToText[USER_CHOICES["MATERIAL"]]
   );
 
-  counter = 0;
-
-  if (options.length > 0) iterateChoices(sender_psid);
+  if (options.length) iterateChoices(sender_psid);
   else
     sendQuickText(
       sender_psid,
@@ -300,16 +293,24 @@ const moreInfo = (sender_psid) => {
         sender_psid,
         "You only need to scan a QR code (or directly message me), login to Facebook's Messenger, and answer a set of questions related to which product you're looking for."
       ),
-    3500
+    3200
+  );
+  setTimeout(
+    () =>
+      sendTextMessage(
+        sender_psid,
+        "Once you answer the questions, you'll receive all the items that match your query, and you can choose which one you want."
+      ),
+    10000
   );
   setTimeout(
     () =>
       sendQuickText(
         sender_psid,
-        "Once you answer the questions, you'll receive all the items that match your query, and you can choose which one you want.",
+        "Please notice that we're using Cartier's online catalog as an example",
         [{ title: "Start Shopping", payload: "START" }]
       ),
-    10000
+    15500
   );
 };
 
@@ -364,25 +365,13 @@ const postbackButton = (title, payload) => {
   };
 };
 
-const POST = async (url, data) => {
-  return await axios({
-    method: "post",
-    url: url,
-    data: data,
-  });
-};
-
-const sendQuickMediaMessage = (sender_psid, quickReplies) => {
+const sendQuickMediaMessage = (sender_psid, elements) => {
   const attachment = {
     type: "template",
     payload: {
       template_type: "generic",
-      elements: quickReplies.map(({ title, subtitle, url, buttons }) => ({
-        title: title,
-        subtitle: subtitle,
-        image_url: url,
-        buttons: buttons,
-      })),
+      image_aspect_ratio: "square",
+      elements,
     },
   };
 
