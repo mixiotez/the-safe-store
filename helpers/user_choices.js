@@ -17,7 +17,6 @@ const addChoice = (category, value) => {
 };
 
 const nextChoice = () => {
-  console.log(USER_CHOICES);
   for (const [category, value] of Object.entries(USER_CHOICES)) {
     if (value == "") return category;
   }

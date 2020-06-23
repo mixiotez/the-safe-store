@@ -14,9 +14,6 @@ const handleResponse = async (sender_psid, received_message) => {
       case "CONTINUE":
         chooser(nextChoice(), sender_psid);
         break;
-      case "SPEAK_AGENT":
-        handlers.talkToAgent(sender_psid);
-        break;
       case "MORE_INFORMATION":
         handlers.moreInfo(sender_psid);
         break;
@@ -57,11 +54,6 @@ const handleResponse = async (sender_psid, received_message) => {
         addChoice("METAL", received_message.quick_reply.payload);
         chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
         break;
-      case "RATING_GREAT":
-      case "RATING_OK":
-      case "RATING_BAD":
-        handlers.ratingReceived(sender_psid);
-        break;
       case "SHOW_ANOTHER":
         handlers.showAnother(sender_psid);
         break;
@@ -89,9 +81,6 @@ const handlePostback = (sender_psid, postback) => {
         break;
       case "LIKE_THIS":
         handlers.likeThisOne(sender_psid);
-        break;
-      case "SPEAK_AGENT":
-        handlers.talkToAgent(sender_psid);
         break;
       case "MORE_INFORMATION":
         handlers.moreInfo(sender_psid);

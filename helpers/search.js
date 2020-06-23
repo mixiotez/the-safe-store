@@ -5,25 +5,17 @@ const searchItems = (category = "", maxPrice = "", color = "", stones = "") => {
 
   maxPrice = parseInt(maxPrice, 10);
 
-  console.log(filteredItems.length);
-
   if (category != "")
     filteredItems = filteredItems.filter((item) => item.category === category);
-
-  console.log(filteredItems.length);
 
   if (maxPrice != "") {
     filteredItems = filteredItems.filter((item) => item.price <= maxPrice);
   }
 
-  console.log(filteredItems.length);
-
   if (color != "")
     filteredItems = filteredItems.filter(
       (item) => item.color && item.color.includes(color)
     );
-
-  console.log(filteredItems.length);
 
   if (stones != "") {
     if (stones == "OTHER") {
@@ -40,8 +32,6 @@ const searchItems = (category = "", maxPrice = "", color = "", stones = "") => {
       );
     }
   }
-
-  console.log(filteredItems.length);
 
   return filteredItems;
 };

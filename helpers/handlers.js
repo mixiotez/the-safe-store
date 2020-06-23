@@ -1,11 +1,9 @@
 const axios = require("axios"),
   { searchItems } = require("./search.js"),
   { USER_CHOICES } = require("./user_choices");
-const { response } = require("express");
 
 var options = []; // Options that are filtered by the choice tree, globals
 var counter = 0;
-var REFERENCE = {};
 
 const handleGreeting = async (sender_psid) => {
   // Retrieves user's first name
@@ -36,7 +34,6 @@ const handleGreeting = async (sender_psid) => {
     () =>
       sendQuickText(sender_psid, "Please select from the following options:", [
         { title: "Start Shopping 🛍️", payload: "START" },
-        { title: "Speak with an Agent 💬", payload: "SPEAK_AGENT" },
         { title: "More Information ℹ️", payload: "MORE_INFORMATION" },
       ]),
     9500
@@ -205,7 +202,6 @@ const messageUnrecognized = (sender_psid) => {
     `Sorry, I didn't get that. Please select one of the following options:`,
     [
       { title: "Restart", payload: "START" },
-      { title: "Speak With an Agent", payload: "SPEAK_AGENT" },
       { title: "Continue Shopping", payload: "CONTINUE" },
     ]
   );
@@ -215,9 +211,6 @@ const iterateChoices = (sender_psid) => {
   if (counter >= options.length) {
     counter = 0;
   }
-
-  console.log("Sending media message...");
-  console.log("Counter: " + counter + " ref: " + options[counter].ref);
 
   sendQuickMediaMessage(sender_psid, [
     {
@@ -275,79 +268,22 @@ const displayChoices = async (sender_psid) => {
     payloadToText[USER_CHOICES["MATERIAL"]]
   );
 
-  console.log(options);
   counter = 0;
 
-  if (options.length > 0) {
-    // for (let i = 0; i < options.length; i++) {
-    //   var response = await POST(
-    //     "https://graph.facebook.com/v7.0/me/message_attachments?access_token=" + process.env.PAGE_ACCESS_TOKEN,
-    //     {
-    //       message: {
-    //         attachment: {
-    //           type: "image",
-    //           payload: {
-    //             is_reusable: true,
-    //             url: "https://www.cartier.com" + options[i].image
-    //           }
-    //         }
-    //       }
-    //     }
-    //   );
-
-    //   REFERENCE[options[i].ref] = response.data.attachment_id;
-    // }
-
-    // console.log(REFERENCE);
-
-    iterateChoices(sender_psid);
-  } else {
+  if (options.length > 0) iterateChoices(sender_psid);
+  else
     sendQuickText(
       sender_psid,
-      "I'm afraid an item doesn't exist with these characteristics. Would you like to search again or speak with an agent?",
-      [
-        { title: "Search Again", payload: "START" },
-        { title: "Speak With an Agent", payload: "SPEAK_AGENT" },
-      ]
+      "I'm afraid an item doesn't exist with these characteristics. Would you like to search again?",
+      [{ title: "Search Again", payload: "START" }]
     );
-  }
-};
-
-const talkToAgent = (sender_psid) => {
-  setTimeout(() => {
-    sendTextMessage(
-      sender_psid,
-      "Hi there, my name is Daniel. How can I help you today?"
-    );
-  }, 4000);
-
-  setTimeout(() => {
-    sendQuickText(
-      sender_psid,
-      "Thanks for using the Safe Store. Please rate the agent you just spoke to.",
-      [
-        { title: "Great", payload: "RATING_GREAT" },
-        { title: "OK", payload: "RATING_OK" },
-        { title: "Bad", payload: "RATING_BAD" },
-      ]
-    );
-  }, 8000);
-};
-
-const ratingReceived = (sender_psid) => {
-  sendQuickText(sender_psid, "Your feedback was recorded. Have a great day!", [
-    { title: "Shop again", payload: "START" },
-  ]);
 };
 
 const moreInfo = (sender_psid) => {
   sendQuickText(
     sender_psid,
     "This is a submission for the Facebook Messaging Hackathon. You can find our privacy policy at https://the-safe-store.herokuapp.com/privacy.",
-    [
-      { title: "Continue Shopping", payload: "START" },
-      { title: "Speak with an Agent", payload: "SPEAK_AGENT" },
-    ]
+    [{ title: "Start Shopping", payload: "START" }]
   );
 };
 
@@ -357,7 +293,6 @@ const moreInfo = (sender_psid) => {
  * @param {String} category What category to choose from next.
  */
 const chooser = (category, sender_psid) => {
-  console.log(category);
   switch (category) {
     case "ITEM":
       chooseItems(sender_psid);
@@ -425,8 +360,6 @@ const sendQuickMediaMessage = (sender_psid, quickReplies) => {
     },
   };
 
-  console.log(attachment);
-
   return messageSendAPI(sender_psid, { attachment });
 };
 
@@ -474,8 +407,6 @@ module.exports = {
   sendStartMessage,
   messageUnrecognized,
   chooser,
-  talkToAgent,
-  ratingReceived,
   moreInfo,
   iterateChoices,
   likeThisOne,
