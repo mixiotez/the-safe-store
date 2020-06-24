@@ -1,6 +1,11 @@
 const handlers = require("./handlers.js");
 const { nextChoice, addChoice } = require("./user_choices.js");
-const { chooser } = require("./handlers.js");
+const {
+  chooser,
+  preChooseMetal,
+  chooseMetal,
+  explainMetals,
+} = require("./handlers.js");
 
 const handleResponse = async (sender_psid, received_message) => {
   const greeting = received_message.nlp.entities.greetings
@@ -27,22 +32,19 @@ const handleResponse = async (sender_psid, received_message) => {
       case "MORE_INFORMATION":
         handlers.moreInfo(sender_psid);
         break;
-      case "SHOP_BY_ITEM":
-        chooser("ITEM", sender_psid);
-        break;
-      case "SHOP_BY_PRICE":
-        chooser("PRICE", sender_psid);
-        break;
-      case "SHOP_BY_COLOR":
-        chooser("METAL", sender_psid);
-        break;
       case "ITEMS_RINGS":
       case "ITEMS_BRACELETS":
       case "ITEMS_NECKLACES":
       case "ITEMS_EARRINGS":
       case "ITEMS_ANY":
         addChoice("ITEM", received_message.quick_reply.payload);
-        chooser(nextChoice(), sender_psid); // Gets a string value for a category to chose from next, and sends it to chooser function.
+        preChooseMetal(sender_psid);
+        break;
+      case "EXPLAIN_METALS":
+        explainMetals(sender_psid);
+        break;
+      case "CHOOSE_METAL":
+        chooseMetal(sender_psid);
         break;
       case "MATERIAL_DIAMOND":
       case "MATERIAL_ONYX":
@@ -78,7 +80,7 @@ const handleResponse = async (sender_psid, received_message) => {
         break;
     }
   } catch (err) {
-    console.log(err);
+    console.log("Postback handling error:", err);
     handlers.messageUnrecognized(sender_psid);
   }
 };

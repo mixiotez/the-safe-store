@@ -45,15 +45,12 @@ const sendStartMessage = (sender_psid) => {
   USER_CHOICES["MATERIAL"] = "";
   USER_CHOICES["METAL"] = "";
 
-  sendQuickText(
+  sendTextMessage(
     sender_psid,
-    "Alright! Do you want to browse by category, price, or color?",
-    [
-      { title: "By Category", payload: "SHOP_BY_ITEM" },
-      { title: "By Price", payload: "SHOP_BY_PRICE" },
-      { title: "By Color", payload: "SHOP_BY_COLOR" },
-    ]
+    "Alright! First, I need to ask a few questions."
   );
+
+  setTimeout(() => chooseItems(sender_psid), 3500);
 };
 
 const chooseItems = (sender_psid) => {
@@ -86,11 +83,59 @@ const chooseItems = (sender_psid) => {
       title: "Any",
       payload: "ITEMS_ANY",
     },
+  ]);
+};
+
+const preChooseMetal = (sender_psid) => {
+  sendQuickText(
+    sender_psid,
+    "We have 4 colors based on metals. Would you like to learn more about them?",
+    [
+      {
+        title: "No, thanks",
+        payload: "CHOOSE_METAL",
+      },
+      {
+        title: "Yes, please",
+        payload: "EXPLAIN_METALS",
+      },
+    ]
+  );
+};
+
+const chooseMetal = (sender_psid) => {
+  sendQuickText(sender_psid, "Which metal do you fancy most?", [
+    {
+      title: "Yellow Gold",
+      payload: "METAL_YELLOW_GOLD",
+      image_url: "https://www.colorcombos.com/images/colors/FFD80A.png",
+    },
+    {
+      title: "White Gold",
+      payload: "METAL_WHITE_GOLD",
+      image_url:
+        "https://cdn.shopify.com/s/files/1/0405/8713/products/white_gold_a4_8252ef35-4176-4965-8d83-9aa0b72f0bc6_2048x.jpg?v=1406364517",
+    },
+    {
+      title: "Pink/Rose Gold",
+      payload: "METAL_PINK_GOLD",
+      image_url: "https://www.colorhexa.com/e6c2b4.png",
+    },
+    {
+      title: "Platinum",
+      payload: "METAL_PLATINUM",
+      image_url:
+        "https://www.solidbackgrounds.com/images/2048x2048/2048x2048-platinum-solid-color-background.jpg",
+    },
+    {
+      title: "Any",
+      payload: "METAL_ANY",
+    },
     { title: "Restart", payload: "START" },
   ]);
 };
 
-const chooseMetal = (sender_psid) => {
+const explainMetals = (sender_psid) => {
   sendTextMessage(sender_psid, "Cartier offers the following 4 alloys:");
   setTimeout(
     () =>
@@ -120,53 +165,22 @@ const chooseMetal = (sender_psid) => {
     () => sendTextMessage(sender_psid, "Platinum: 95-98% platinum mixture."),
     16000
   );
-  setTimeout(
-    () =>
-      sendQuickText(sender_psid, "What metal do you fancy most?", [
-        {
-          title: "Yellow Gold",
-          payload: "METAL_YELLOW_GOLD",
-          image_url: "https://www.colorcombos.com/images/colors/FFD80A.png",
-        },
-        {
-          title: "White Gold",
-          payload: "METAL_WHITE_GOLD",
-          image_url:
-            "https://cdn.shopify.com/s/files/1/0405/8713/products/white_gold_a4_8252ef35-4176-4965-8d83-9aa0b72f0bc6_2048x.jpg?v=1406364517",
-        },
-        {
-          title: "Pink/Rose Gold",
-          payload: "METAL_PINK_GOLD",
-          image_url: "https://www.colorhexa.com/e6c2b4.png",
-        },
-        {
-          title: "Platinum",
-          payload: "METAL_PLATINUM",
-          image_url:
-            "https://www.solidbackgrounds.com/images/2048x2048/2048x2048-platinum-solid-color-background.jpg",
-        },
-        {
-          title: "Any",
-          payload: "METAL_ANY",
-        },
-        { title: "Restart", payload: "START" },
-      ]),
-    18000
-  );
+
+  setTimeout(() => chooseMetal(sender_psid), 18500);
 };
 
 const choosePrice = (sender_psid) => {
   sendQuickText(sender_psid, "What is your price range?", [
-    { title: "< $2500", payload: "PRICE_LESS_2500" },
+    { title: "Less than $2500", payload: "PRICE_LESS_2500" },
     { title: "Up to $10K", payload: "PRICE_2500_10K" },
     { title: "Up to $25K", payload: "PRICE_10K_25K" },
-    { title: "> $25K", payload: "PRICE_25K_MORE" },
+    { title: "More than $25K", payload: "PRICE_25K_MORE" },
     { title: "Restart", payload: "START" },
   ]);
 };
 
 const chooseMaterials = (sender_psid) => {
-  sendQuickText(sender_psid, "Which materials are you seeking?", [
+  sendQuickText(sender_psid, "Which material would you like to see?", [
     {
       title: "Diamond",
       payload: "MATERIAL_DIAMOND",
@@ -285,7 +299,7 @@ const displayChoices = async (sender_psid) => {
 const moreInfo = (sender_psid) => {
   sendTextMessage(
     sender_psid,
-    "I am a chatbot that serve as a sales representative."
+    "I am a chatbot, and I serve as a sales representative."
   );
   setTimeout(
     () =>
@@ -307,7 +321,7 @@ const moreInfo = (sender_psid) => {
     () =>
       sendQuickText(
         sender_psid,
-        "Please notice that we're using Cartier's online catalog as an example",
+        "Please notice that we're using Cartier's online catalog to showcase the experience.",
         [{ title: "Start Shopping", payload: "START" }]
       ),
     15500
@@ -330,7 +344,10 @@ const chooser = (category, sender_psid) => {
     case "MATERIAL":
       chooseMaterials(sender_psid);
       break;
-    case "METAL":
+    case "EXPLAIN_METALS":
+      explainMetals(sender_psid);
+      break;
+    case "CHOOSE_METAL":
       chooseMetal(sender_psid);
       break;
     case "FINISHED":
@@ -429,4 +446,7 @@ module.exports = {
   likeThisOne,
   showAnother,
   callSenderActionAPI,
+  preChooseMetal,
+  chooseMetal,
+  explainMetals,
 };

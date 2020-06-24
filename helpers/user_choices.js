@@ -1,9 +1,9 @@
 // A global USER_CHOICES variable that is updated after every message is handled.
 var USER_CHOICES = {
   ITEM: "",
-  PRICE: "",
-  MATERIAL: "",
   METAL: "",
+  MATERIAL: "",
+  PRICE: "",
 };
 
 /**
