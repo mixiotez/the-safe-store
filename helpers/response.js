@@ -13,12 +13,12 @@ const handleResponse = async (sender_psid, received_message) => {
     : "";
 
   if (
-    (greeting && greeting.confidence > 0.7) ||
+    (greeting && greeting.confidence > 0.8) ||
     received_message.text === "Restart"
   )
     return handlers.handleGreeting(sender_psid);
 
-  try {
+  if (received_message.quick_reply)
     switch (received_message.quick_reply.payload) {
       case "GET_STARTED":
         handlers.handleGreeting(sender_psid);
@@ -79,8 +79,7 @@ const handleResponse = async (sender_psid, received_message) => {
         handlers.messageUnrecognized(sender_psid);
         break;
     }
-  } catch (err) {
-    console.log("Postback handling error:", err);
+  else {
     handlers.messageUnrecognized(sender_psid);
   }
 };
